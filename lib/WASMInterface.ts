@@ -1,8 +1,13 @@
 import Mutex from './mutex';
 import {
-  decodeBase64, getDigestHex, getUInt8Buffer, IDataType, writeHexToUInt8,
+  getDigestHex, getUInt8Buffer, IDataType, writeHexToUInt8,
   hexStringEqualsUInt8,
 } from './util';
+
+// @ts-expect-error wasm
+import argon2WASM from '../wasm/argon2.wasm';
+// @ts-expect-error wasm
+import blake2bWASM from '../wasm/blake2b.wasm';
 
 export const MAX_HEAP = 16 * 1024;
 const WASM_FUNC_HASH_LENGTH = 4;
@@ -88,10 +93,15 @@ export async function WASMInterface(binary: any, hashLength: number) {
 
   const loadWASMPromise = wasmMutex.dispatch(async () => {
     if (!wasmModuleCache.has(binary.name)) {
-      const asm = decodeBase64(binary.data);
-      const promise = WebAssembly.compile(asm);
+      // The following does not work on edge environments, see https://github.com/Daninet/hash-wasm/issues/58
+      // const asm = decodeBase64(binary.data);
+      // const promise = WebAssembly.compile(asm);
+      const mod = {
+        argon2: argon2WASM,
+        blake2b: blake2bWASM,
+      }[binary.name];
 
-      wasmModuleCache.set(binary.name, promise);
+      wasmModuleCache.set(binary.name, mod());
     }
 
     const module = await wasmModuleCache.get(binary.name);
@@ -205,44 +215,8 @@ export async function WASMInterface(binary: any, hashLength: number) {
     initialized = true;
   };
 
-  const isDataShort = (data: IDataType) => {
-    if (typeof data === 'string') {
-      // worst case is 4 bytes / char
-      return data.length < MAX_HEAP / 4;
-    }
-
-    return data.byteLength < MAX_HEAP;
-  };
-
-  let canSimplify:
-    (data: IDataType, initParam?: number) => boolean = isDataShort;
-
-  switch (binary.name) {
-    case 'argon2':
-    case 'scrypt':
-      canSimplify = () => true;
-      break;
-
-    case 'blake2b':
-    case 'blake2s':
-      // if there is a key at blake2 then cannot simplify
-      canSimplify = (data, initParam) => initParam <= 512 && isDataShort(data);
-      break;
-
-    case 'blake3':
-      // if there is a key at blake3 then cannot simplify
-      canSimplify = (data, initParam) => initParam === 0 && isDataShort(data);
-      break;
-
-    case 'xxhash64': // cannot simplify
-    case 'xxhash3':
-    case 'xxhash128':
-      canSimplify = () => false;
-      break;
-
-    default:
-      break;
-  }
+  const canSimplify:
+    (data: IDataType, initParam?: number) => boolean = () => true;
 
   // shorthand for (init + update + digest) for better performance
   const calculate = (

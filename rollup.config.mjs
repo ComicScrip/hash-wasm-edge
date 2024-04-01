@@ -1,15 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import typescript from '@rollup/plugin-typescript';
+import { wasm } from '@rollup/plugin-wasm';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
-// import gzipPlugin from 'rollup-plugin-gzip';
 import license from 'rollup-plugin-license';
 
-const ALGORITHMS = [
-  'adler32', 'argon2', 'bcrypt', 'blake2b', 'blake2s', 'blake3', 'crc32', 'crc32c', 'hmac', 'keccak', 'md4', 'md5',
-  'pbkdf2', 'ripemd160', 'scrypt', 'sha1', 'sha3', 'sha224', 'sha256', 'sha384', 'sha512',
-  'sm3', 'whirlpool', 'xxhash32', 'xxhash64', 'xxhash3', 'xxhash128',
-];
+const ALGORITHMS = ['argon2'];
 
 const TERSER_CONFIG = {
   output: {
@@ -20,8 +16,8 @@ const TERSER_CONFIG = {
 const LICENSE_CONFIG = {
   banner: {
     commentStyle: 'ignored',
-    content: `hash-wasm (https://www.npmjs.com/package/hash-wasm)
-    (c) Dani Biro
+    content: `hash-wasm (https://www.npmjs.com/package/argon2-wasm-edge)
+    (c) Pierre Genthon
     @license MIT`,
   },
 };
@@ -40,6 +36,7 @@ const MAIN_BUNDLE_CONFIG = {
     },
   ],
   plugins: [
+    wasm(),
     json(),
     typescript(),
     license(LICENSE_CONFIG),
@@ -60,6 +57,7 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
     },
   ],
   plugins: [
+    wasm(),
     json(),
     typescript(),
     terser(TERSER_CONFIG),
@@ -78,6 +76,7 @@ const INDIVIDUAL_BUNDLE_CONFIG = (algorithm) => ({
     },
   ],
   plugins: [
+    wasm(),
     json(),
     typescript(),
     terser(TERSER_CONFIG),
