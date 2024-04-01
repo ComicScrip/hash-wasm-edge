@@ -1,6 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import typescript from '@rollup/plugin-typescript';
-import { wasm } from '@rollup/plugin-wasm';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
 import license from 'rollup-plugin-license';
@@ -36,7 +35,6 @@ const MAIN_BUNDLE_CONFIG = {
     },
   ],
   plugins: [
-    wasm(),
     json(),
     typescript(),
     license(LICENSE_CONFIG),
@@ -57,7 +55,6 @@ const MINIFIED_MAIN_BUNDLE_CONFIG = {
     },
   ],
   plugins: [
-    wasm(),
     json(),
     typescript(),
     terser(TERSER_CONFIG),
@@ -76,7 +73,6 @@ const INDIVIDUAL_BUNDLE_CONFIG = (algorithm) => ({
     },
   ],
   plugins: [
-    wasm(),
     json(),
     typescript(),
     terser(TERSER_CONFIG),

@@ -5,7 +5,7 @@ import {
   getDigestHex, getUInt8Buffer, IDataType, writeHexToUInt8,
 } from './util';
 import { createBLAKE2b } from './blake2b';
-import { WASMInterface, IHasher } from './WASMInterface';
+import { WASMInterface, IHasher, wasmModuleCache } from './WASMInterface';
 import wasmJson from '../wasm/argon2.wasm.json';
 
 export interface IArgon2Options {
@@ -364,4 +364,11 @@ export async function argon2Verify(options: Argon2VerifyOptions): Promise<boolea
   const hashStart = options.hash.lastIndexOf('$') + 1;
   const result = await argon2Internal(params) as string;
   return result.substring(hashStart) === options.hash.substring(hashStart);
+}
+
+export async function setWASMModules(
+  { argon2WASM, blake2bWASM }: {argon2WASM: WebAssembly.Module, blake2bWASM: WebAssembly.Module },
+) {
+  wasmModuleCache.set('argon2', Promise.resolve(argon2WASM));
+  wasmModuleCache.set('blake2b', Promise.resolve(blake2bWASM));
 }

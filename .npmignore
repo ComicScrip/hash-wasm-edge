@@ -22,10 +22,9 @@ node_modules/
 .env
 
 dist
+#wasm
 
 .jest-cache
-
-wasm
 
 benchmark
 test

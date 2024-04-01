@@ -2,12 +2,8 @@ import Mutex from './mutex';
 import {
   getDigestHex, getUInt8Buffer, IDataType, writeHexToUInt8,
   hexStringEqualsUInt8,
+  decodeBase64,
 } from './util';
-
-// @ts-expect-error wasm
-import argon2WASM from '../wasm/argon2.wasm';
-// @ts-expect-error wasm
-import blake2bWASM from '../wasm/blake2b.wasm';
 
 export const MAX_HEAP = 16 * 1024;
 const WASM_FUNC_HASH_LENGTH = 4;
@@ -60,7 +56,7 @@ export type IHasher = {
   digestSize: number;
 }
 
-const wasmModuleCache = new Map<string, Promise<WebAssembly.Module>>();
+export const wasmModuleCache = new Map<string, Promise<WebAssembly.Module>>();
 
 export async function WASMInterface(binary: any, hashLength: number) {
   let wasmInstance = null;
@@ -94,14 +90,13 @@ export async function WASMInterface(binary: any, hashLength: number) {
   const loadWASMPromise = wasmMutex.dispatch(async () => {
     if (!wasmModuleCache.has(binary.name)) {
       // The following does not work on edge environments, see https://github.com/Daninet/hash-wasm/issues/58
-      // const asm = decodeBase64(binary.data);
-      // const promise = WebAssembly.compile(asm);
-      const mod = {
-        argon2: argon2WASM,
-        blake2b: blake2bWASM,
-      }[binary.name];
-
-      wasmModuleCache.set(binary.name, mod());
+      try {
+        const asm = decodeBase64(binary.data);
+        const promise = WebAssembly.compile(asm);
+        wasmModuleCache.set(binary.name, promise);
+      } catch (e:any) {
+        throw new Error(`${e} You probably forgot to call setWASMModules() on an Edge environment. See "Usage" section at https://www.npmjs.com/package/argon2-wasm-edge`);
+      }
     }
 
     const module = await wasmModuleCache.get(binary.name);
