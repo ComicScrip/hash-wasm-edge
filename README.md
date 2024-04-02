@@ -64,8 +64,8 @@ setWASMModules({ argon2WASM, blake2bWASM });
 export const config = { runtime: 'edge' };
 
 export default async function handler(req: Request) {
-  const [_, query] = req.url.split('?');
-  const [__, password] = query.split('password=');
+  const password = new URL(req.url).searchParams.get('password');
+  if (!password) throw new Error('Missing password, try /api/hash-password?password=verysecure');
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
   const hashedPassword = await argon2id({ ...params, password, salt });
@@ -89,8 +89,8 @@ import blake2bWASM from 'argon2-wasm-edge/wasm/blake2b.wasm';
 setWASMModules({ argon2WASM, blake2bWASM });
 
 async function fetch(req: Request) {
-  const [_, query] = req.url.split('?');
-  const [__, password] = query.split('password=');
+  const password = new URL(req.url).searchParams.get('password');
+  if (!password) throw new Error('Missing password, try /api/hash-password?password=verysecure');
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
   const hashedPassword = await argon2id({ ...params, password, salt });

@@ -1,6 +1,6 @@
 {
   "name": "argon2-wasm-edge",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "Lightning fast Argon2 implementation runnable on Vercel Edge and CF Workers",
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
