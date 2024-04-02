@@ -1,7 +1,7 @@
 ## About
 
 This library is heavily inspired by [hash-wasm](https://www.npmjs.com/package/hash-wasm). 
-It only includes the Argon2 algorithm and can run on Vercel Edge functions and Cloudflare Workers.
+It only includes the Argon2 algorithm and can run on Vercel Edge functions and Cloudflare.
 
 ## Hashing passwords with Argon2
 
@@ -32,14 +32,12 @@ async function run() {
   window.crypto.getRandomValues(salt);
 
   const key = await argon2id({ ...params, password: 'pass', salt });
-
   console.log('Derived key:', key);
 
   const isValid = await argon2Verify({
     password: 'pass',
     hash: key,
   });
-
   console.log(isValid ? 'Valid password' : 'Invalid password');
 }
 
