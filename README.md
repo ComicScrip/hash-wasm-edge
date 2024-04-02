@@ -8,9 +8,6 @@ It only includes the Argon2 algorithm and can run on Vercel Edge functions and C
 ### Parameters
 
 *hasingParams.ts*
-
-The recommended process for choosing the parameters can be found [here](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-04#section-4).
-
 ```typescript
 export default {
   parallelism: 1,
@@ -20,6 +17,7 @@ export default {
   outputType: 'encoded', // return standard encoded string containing parameters needed to verify the key
 };
 ```
+The recommended process for choosing the parameters can be found [here](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-04#section-4).
 
 ### Usage on standard Node and Bun environments
 
